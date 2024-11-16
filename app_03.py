@@ -9,10 +9,10 @@ def fetch_page(url):
 def parse_page(html):
 	soup = BeautifulSoup(html, 'html.parser')
 	product_name = soup.find('h1', class_='ui-pdp-title').get_text()
-	price: list = soup.find_all('span', class_='andes-money-amount__fraction')
-	old_price: int = int(price[0].get_text().replace('.', ''))
-	new_price: int = int(price[1].get_text().replace('.', ''))
-	installment_price: int = int(price[2].get_text().replace('.', ''))
+	prices: list = soup.find_all('span', class_='andes-money-amount__fraction')
+	old_price: int = int(prices[0].get_text().replace('.', ''))
+	new_price: int = int(prices[1].get_text().replace('.', ''))
+	installment_price: int = int(prices[2].get_text().replace('.', ''))
 
 	return{
 		'product_name' : product_name,
