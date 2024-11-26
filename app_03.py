@@ -18,7 +18,7 @@ def parse_page(html):
 		'product_name' : product_name,
 		'old_price' : old_price,
 		'new_price' : new_price,
-		'installment_price' : installment_price,
+		'installment_price' : installment_price
 		
 	}
 	
