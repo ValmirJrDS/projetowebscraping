@@ -70,12 +70,30 @@ def parse_page(html: str) -> dict:
         'installment_price': installment_price,
         'timestamp': timestamp
     }
+def create_connection(db_name='iphone_price.db'):
+    """ Criar uma conecção com o BD Sqlite """
+    conn = sqlite3.connect(db_name)
+    return conn
 
+def setup_database(conn):
+    """ Criar uma tabela de preços se não existir """
+    cursor = conn.cursor()
+    cursor.execute(
+        """ CREATE TABLE IF NOT EXISTS prices(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_name TEXT,
+            old_price INTEGER,
+            new_price INTEGER,
+            installment_price INTEGER,
+            timestamp TEXT
+          ) 
+    """)
+    conn.commit()
 
-def save_to_dataframe(produto_info, df):
+def save_to_database(conn, produto_info):
+    """ Salvar uma linha de dados no BD SQlite usando pandas """
     new_row = pd.DataFrame([produto_info])
-    df = pd.concat([df, new_row], ignore_index=True)
-    return df
+    new_row.to_sql('prices', conn, if_exists='append', index=False)
 
 if __name__ == "__main__":
     """
@@ -89,12 +107,14 @@ if __name__ == "__main__":
     - Considere implementar tratamento de erros para requisições falhas
     - Verifique os termos de uso do site antes de usar em produção
     """
-    df = pd.DataFrame()
+    conn = create_connection()
+    setup_database(conn)
+
 
     while True:
         url = "https://www.mercadolivre.com.br/apple-iphone-16-pro-max-1-tb-titnio-natural-distribuidor-autorizado/p/MLB1040287867?pdp_filters=item_id:MLB3846015269#wid=MLB3846015269&sid=search&is_advertising=true&searchVariation=MLB1040287867&position=5&search_layout=stack&type=pad&tracking_id=84de19cc-05ee-4ed7-b75f-1bb31ae86928&is_advertising=true&ad_domain=VQCATCORE_LST&ad_position=5&ad_click_id=YTRkOTdiYWYtZjEwZS00ODRiLTgyNGEtMDg2OWNmODkzNjRm"
         page_content = fetch_page(url)
         produto_info = parse_page(page_content)
-        df = save_to_dataframe(produto_info, df)
-        print(df)
+        save_to_database(conn, produto_info)
+        print("Dados salvos no Banco de dados: ", produto_info)
         time.sleep(10)
